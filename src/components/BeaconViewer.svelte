@@ -43,6 +43,7 @@
 
 <div class="backdrop" onclick={onClose} role="presentation">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_interactive_supports_focus -->
   <div class="viewer" onclick={(e) => e.stopPropagation()} role="dialog">
     <div class="noise-indicator" style="opacity: {noise}">
       衰减: {Math.floor(noise * 100)}%

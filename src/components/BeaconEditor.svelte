@@ -24,6 +24,7 @@
 
 <div class="backdrop" onclick={onCancel} role="presentation">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_interactive_supports_focus -->
   <div class="editor" onclick={(e) => e.stopPropagation()} role="dialog">
     <h2>放置回声信标</h2>
     <p class="desc">你的消息将逐渐被时间吞噬</p>
