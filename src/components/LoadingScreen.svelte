@@ -21,10 +21,14 @@
     visible = false
     setTimeout(onEnter, 500)
   }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') handleClick()
+  }
 </script>
 
 {#if visible}
-  <div class="loading" onclick={handleClick} role="button" tabindex="0">
+  <div class="loading" onclick={handleClick} onkeydown={handleKeydown} role="button" tabindex="0">
     <h1 class:show={titleVisible}>终焉视界</h1>
     <p class="subtitle" class:show={subtitleVisible}>TERMINUS HORIZON</p>
     <div class="controls" class:show={hintVisible}>
