@@ -1,47 +1,121 @@
-# Svelte + TS + Vite
+[English](README-EN.md)
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+# 终焉视界 (Terminus Horizon)
 
-## Recommended IDE Setup
+一个基于 WebGL 的交互式 Web 体验。用户以第一人称视角在程序化生成的 3D 世界中漫游，随着不断前行，周围的视觉元素逐渐经历"数字风化"——从清晰的高清渲染退化为像素块、乱码，最终归于虚空。用户还可以在世界中放置"回声信标"封存消息，这些信标会随时间和访问逐渐衰减消逝。
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## 功能特性
 
-## Need an official Svelte framework?
+### 熵增画廊 (The Entropy Gallery)
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- **程序化世界生成**：世界沿 Z 轴无限延伸，由 Chunk 系统动态加载/卸载
+- **熵值系统**：距离起点越远，熵值越高，视觉崩坏越严重
+  - 文明阶段 (0.0-0.2)：清晰渲染，正常光照
+  - 风化阶段 (0.2-0.4)：颜色褪色，边缘噪点
+  - 像素化阶段 (0.4-0.6)：分辨率降低，几何简化
+  - 乱码阶段 (0.6-0.8)：顶点位移，色差效果
+  - 虚空阶段 (0.8-1.0)：几何溶解，归于黑暗
 
-## Technical considerations
+### 回声信标 (Echo Beacons)
 
-**Why use this over SvelteKit?**
+- 在世界中放置持久化消息信标
+- 信标随时间和查看次数逐渐衰减消逝
+- 支持查看其他玩家留下的信标
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## 技术栈
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+| 层面 | 技术 |
+|------|------|
+| 前端框架 | Svelte 5 + Vite |
+| 3D 渲染 | Three.js + 自定义 GLSL Shaders |
+| 后端/数据库 | Supabase (PostgreSQL + Realtime) |
+| 语言 | TypeScript |
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+## 项目结构
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
-
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
 ```
+terminus/
+├── src/
+│   ├── lib/
+│   │   ├── engine/         # Three.js 场景、相机、渲染循环
+│   │   ├── world/          # Chunk 生成、程序化内容
+│   │   ├── shaders/        # GLSL vertex/fragment shaders
+│   │   ├── entropy/        # 熵值系统、崩坏效果管理
+│   │   ├── beacons/        # 信标系统（放置、衰减、渲染）
+│   │   ├── controls/       # 第一人称控制器
+│   │   └── supabase/       # Supabase 客户端、数据操作
+│   ├── components/         # Svelte UI 组件（HUD、信标编辑器）
+│   ├── App.svelte
+│   └── main.ts
+├── public/
+├── docs/
+│   └── plans/              # 设计文档
+├── package.json
+└── vite.config.ts
+```
+
+## 快速开始
+
+### 环境要求
+
+- Node.js 18+
+- pnpm (推荐) 或 npm
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+### 环境配置
+
+复制 `.env.example` 为 `.env` 并填入你的 Supabase 配置：
+
+```bash
+cp .env.example .env
+```
+
+需要配置以下环境变量：
+- `VITE_SUPABASE_URL` - Supabase 项目 URL
+- `VITE_SUPABASE_ANON_KEY` - Supabase 匿名密钥
+
+### 开发运行
+
+```bash
+pnpm dev
+```
+
+### 构建生产版本
+
+```bash
+pnpm build
+```
+
+### 预览生产版本
+
+```bash
+pnpm preview
+```
+
+## 操作说明
+
+| 按键 | 功能 |
+|------|------|
+| WASD | 移动 |
+| 鼠标 | 视角控制 |
+| E | 放置信标 |
+| F | 查看信标 |
+| ESC | 退出/解锁鼠标 |
+
+## 开发资源
+
+- [设计文档](docs/plans/2026-02-21-terminus-horizon-design.md)
+- [实现计划](docs/plans/2026-02-21-terminus-horizon-implementation.md)
+
+## IDE 推荐
+
+[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+
+## License
+
+MIT
