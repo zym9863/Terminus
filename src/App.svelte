@@ -161,8 +161,8 @@
 
   let interactHint = $derived.by(() => {
     if (showEditor || showViewer) return null
-    if (closestBeacon) return '按 F 查看信标'
-    return '按 E 放置信标'
+    if (closestBeacon) return 'PRESS [F] TO READ BEACON'
+    return 'PRESS [E] TO PLACE BEACON'
   })
 </script>
 
@@ -179,8 +179,8 @@
     <div class="paused-overlay" onclick={() => {
       if (controlsRef) controlsRef.enable()
     }}>
-      <p>点击继续</p>
-      <p class="sub">ESC 暂停</p>
+      <p>SYSTEM PAUSED</p>
+      <p class="sub">[ CLICK TO RESUME ]</p>
     </div>
   {/if}
 
@@ -203,11 +203,31 @@
 </main>
 
 <style>
+  :global(:root) {
+    --color-bg: #020203;
+    --color-primary: #00f0ff;
+    --color-primary-dim: rgba(0, 240, 255, 0.3);
+    --color-primary-glow: rgba(0, 240, 255, 0.8);
+    --color-danger: #ff3300;
+    --color-danger-dim: rgba(255, 51, 0, 0.3);
+    --color-text: #e0f8ff;
+    --color-text-dim: #6b8a99;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-display: 'Orbitron', sans-serif;
+  }
+
   :global(body) {
     margin: 0;
     overflow: hidden;
-    background: #000;
-    font-family: 'Courier New', monospace;
+    background: var(--color-bg);
+    font-family: var(--font-mono);
+    color: var(--color-text);
+    user-select: none;
+  }
+
+  :global(*::selection) {
+    background: var(--color-primary);
+    color: var(--color-bg);
   }
 
   main {
@@ -222,6 +242,22 @@
     display: block;
   }
 
+  /* Global CRT Overlay */
+  main::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
   .paused-overlay {
     position: absolute;
     top: 0;
@@ -232,21 +268,36 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.5);
-    color: #8899bb;
+    background: rgba(2, 2, 3, 0.8);
+    backdrop-filter: blur(4px);
+    color: var(--color-primary);
     cursor: pointer;
     z-index: 10;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
   }
 
   .paused-overlay p {
-    font-size: 1.2rem;
-    opacity: 0.7;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--color-primary-glow);
+    margin: 0;
+    animation: blink 2s infinite;
   }
 
   .paused-overlay .sub {
-    font-size: 0.7rem;
-    opacity: 0.4;
-    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--color-text-dim);
+    text-shadow: none;
+    margin-top: 1rem;
+    letter-spacing: 0.1em;
+    animation: none;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 </style>

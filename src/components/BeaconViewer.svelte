@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type { BeaconData } from '../lib/supabase/beacons'
   import { calculateEffectiveNoise } from '../lib/supabase/beacons'
 
@@ -9,7 +9,7 @@
 
   let { beacon, onClose }: Props = $props()
 
-  const GLITCH_CHARS = '█▓░▒╳╬◼◻◾◽■□▪▫'.split('')
+  const GLITCH_CHARS = ''.split('')
 
   let noise = $derived(calculateEffectiveNoise(beacon))
 
@@ -28,10 +28,10 @@
     const now = Date.now()
     const created = new Date(beacon.created_at).getTime()
     const hours = Math.floor((now - created) / (1000 * 60 * 60))
-    if (hours < 1) return '刚刚'
-    if (hours < 24) return `${hours} 小时前`
+    if (hours < 1) return 'JUST NOW'
+    if (hours < 24) return `T-${hours}H`
     const days = Math.floor(hours / 24)
-    return `${days} 天前`
+    return `T-${days}D`
   })
 
   function handleKeydown(e: KeyboardEvent) {
@@ -46,23 +46,44 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_interactive_supports_focus -->
   <div class="viewer" onclick={(e) => e.stopPropagation()} role="dialog">
-    <div class="noise-indicator" style="opacity: {noise}">
-      衰减: {Math.floor(noise * 100)}%
+    <div class="viewer-header">
+      <span class="title">BEACON_DATA_STREAM</span>
+      <span class="status" class:warning={noise > 0.5}>
+        {noise > 0.5 ? 'CORRUPTED' : 'STABLE'}
+      </span>
     </div>
 
-    <div class="message" style="opacity: {1 - noise * 0.5}">
-      {corruptedMessage}
+    <div class="viewer-body">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="label">AUTHOR_ID</span>
+          <span class="val">{beacon.author || 'ANONYMOUS'}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">TIMESTAMP</span>
+          <span class="val">{timeAgo}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">ACCESS_COUNT</span>
+          <span class="val">{beacon.view_count.toString().padStart(4, '0')}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">SIGNAL_DECAY</span>
+          <span class="val" class:warning={noise > 0.5}>{Math.floor(noise * 100)}%</span>
+        </div>
+      </div>
+
+      <div class="message-container">
+        <div class="message-label">PAYLOAD:</div>
+        <div class="message" style="opacity: {1 - noise * 0.3}">
+          {corruptedMessage}
+        </div>
+      </div>
     </div>
 
-    <div class="meta">
-      <span>{beacon.author || '匿名'}</span>
-      <span>·</span>
-      <span>{timeAgo}</span>
-      <span>·</span>
-      <span>被查看 {beacon.view_count} 次</span>
+    <div class="actions">
+      <div class="close-hint">[ PRESS F OR ESC TO CLOSE CONNECTION ]</div>
     </div>
-
-    <div class="close-hint">按 F 或 Esc 关闭</div>
   </div>
 </div>
 
@@ -70,50 +91,151 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(2, 2, 3, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(8px);
   }
 
   .viewer {
-    background: rgba(10, 10, 20, 0.95);
-    border: 1px solid rgba(80, 140, 220, 0.15);
-    border-radius: 8px;
-    padding: 2rem;
-    width: 420px;
+    background: rgba(5, 10, 15, 0.95);
+    border: 1px solid var(--color-primary);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(0, 240, 255, 0.05);
+    width: 500px;
     max-width: 90vw;
-    color: #aabbdd;
-    font-family: 'Courier New', monospace;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    position: relative;
+    animation: glitch-box 0.2s ease-out;
   }
 
-  .noise-indicator {
+  .viewer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+  }
+
+  .viewer-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1.5rem;
+    background: rgba(0, 240, 255, 0.1);
+    border-bottom: 1px solid var(--color-primary-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  .title {
+    color: var(--color-primary);
+    font-weight: bold;
+  }
+
+  .status {
+    color: var(--color-primary);
+  }
+
+  .status.warning {
+    color: var(--color-danger);
+    animation: blink 1s infinite;
+  }
+
+  .viewer-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--color-primary-dim);
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .label {
     font-size: 0.65rem;
-    color: #ff6644;
-    margin-bottom: 1rem;
+    color: var(--color-text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .val {
+    font-size: 0.9rem;
+    color: var(--color-primary);
+  }
+
+  .val.warning {
+    color: var(--color-danger);
+    text-shadow: 0 0 5px var(--color-danger-dim);
+  }
+
+  .message-container {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--color-primary-dim);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .message-label {
+    position: absolute;
+    top: -0.6rem;
+    left: 1rem;
+    background: rgba(5, 10, 15, 0.95);
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    color: var(--color-primary);
+    letter-spacing: 0.1em;
   }
 
   .message {
-    font-size: 1rem;
+    font-size: 1.1rem;
     line-height: 1.6;
-    margin-bottom: 1.5rem;
+    white-space: pre-wrap;
     word-break: break-word;
-    min-height: 3rem;
+    color: var(--color-text);
+    text-shadow: 0 0 2px var(--color-primary-dim);
   }
 
-  .meta {
-    font-size: 0.7rem;
-    opacity: 0.4;
-    display: flex;
-    gap: 0.5rem;
+  .actions {
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid var(--color-primary-dim);
+    text-align: center;
   }
 
   .close-hint {
-    margin-top: 1.5rem;
-    font-size: 0.65rem;
-    opacity: 0.3;
-    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+    letter-spacing: 0.1em;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes glitch-box {
+    0% { transform: scale(0.98) skewX(2deg); opacity: 0; }
+    20% { transform: scale(1.02) skewX(-2deg); opacity: 1; }
+    40% { transform: scale(0.99) skewX(1deg); }
+    60% { transform: scale(1.01) skewX(-1deg); }
+    80% { transform: scale(1) skewX(0); }
+    100% { transform: scale(1); }
   }
 </style>
