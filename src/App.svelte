@@ -169,8 +169,12 @@
     <LoadingScreen onEnter={handleEnter} />
   {/if}
 
-  {#if !showLoading && !isLocked && gameStarted}
-    <div class="paused-overlay">
+  {#if !showLoading && !isLocked && gameStarted && !showEditor && !showViewer}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="paused-overlay" onclick={() => {
+      if (controlsRef) controlsRef.enable()
+    }}>
       <p>点击继续</p>
       <p class="sub">ESC 暂停</p>
     </div>
