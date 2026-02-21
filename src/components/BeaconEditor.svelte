@@ -15,6 +15,7 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
+    if (e.repeat) return
     if (e.key === 'Escape') onCancel()
     if (e.key === 'Enter' && e.ctrlKey) handleSubmit()
   }

@@ -67,11 +67,15 @@
       if (!controls.isLocked()) return
 
       if (e.code === 'KeyE' && !showEditor && !showViewer) {
+        e.preventDefault()
+        e.stopPropagation()
         showEditor = true
         controls.disable()
       }
 
       if (e.code === 'KeyF' && closestBeacon && !showEditor && !showViewer) {
+        e.preventDefault()
+        e.stopPropagation()
         showViewer = true
         viewingBeacon = closestBeacon
         controls.disable()
